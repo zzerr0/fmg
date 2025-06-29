@@ -1,6 +1,6 @@
 import { sql } from "../config/db.js";
 
-export async function getTransactionsByUserId() {
+export async function getTransactionsByUserId(req, res) {
         try {
             const {userId} = req.params;
             const transactions = await sql `
@@ -9,7 +9,7 @@ export async function getTransactionsByUserId() {
             res.status(200).json(transactions);
         } catch(error) {
             console.log("Error In Getting Transactions : ", error);
-            res.status(500).json({message:" Internal server error"});
+            res.status(500).json({message:" Internal server errorr"});
         }
 }
 
