@@ -17,13 +17,14 @@ export async function  createTransactions(req,res) {
     //send title, amount, etc to DB
     try {
         const {title, user_id, amount, category } = req.body;
+        console.log("req body is ------- ");
         if (!title || !user_id || amount === undefined || !category) {
             // One or more required fields are missing
-            return res.status(400).json({message : "All fields are required"});
+            return res.status(400).json({message : "All fffields are required"});
           }
         
         const transactions = await sql `
-            INSERT INTO transactions(user_id, title, amount, category)
+            INSERT INTO transactions(id, user_id, title, amount, category)
             VALUES (${user_id},${title},${amount},${category})
             RETURNING *
         `
@@ -91,3 +92,62 @@ export async function getSummaryByUserId(req, res) {
       res.status(500).json({ message: "Internal server error" });
     }
   }
+
+export async function getUserProfileInfo(req, res) {
+    console.log('Inside get User Profile');
+    try {
+      const { userId } = req.params;
+  
+      // 1) Fetch the profile row (if any)
+      const [profile] = await sql`
+        SELECT 
+          id,
+          user_id,
+          name,
+          email,
+          phone,
+          sports,
+          sports_other,
+          experience,
+          experience_other,
+          preferences,
+          preferences_other,
+          health,
+          health_other,
+          bmi,
+          bmi_other,
+          ageGroup,
+          ageGroup_other,
+          bloodGroup,
+          bloodGroup_other,
+          created_at
+        FROM userprofileinfo
+        WHERE user_id = ${userId}
+      `;
+  
+    //   // 2) Fetch all transactions for that user
+    //   const transactions = await sql`
+    //     SELECT 
+    //       id,
+    //       user_id,
+    //       title,
+    //       amount,
+    //       category,
+    //       created_at
+    //     FROM transactions
+    //     WHERE user_id = ${userId}
+    //     ORDER BY created_at DESC
+    //   `;
+  
+      // 3) Return both in one JSON payload
+      return res.status(200).json({
+        profile:      profile || null
+      });
+    } catch (error) {
+      console.error("Error in getUserProfileInfo:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error" });
+    }
+}
+  

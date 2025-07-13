@@ -1,11 +1,14 @@
 import express from "express";
 import { sql } from "../config/db.js";
-import { getTransactionsByUserId, deleteTransactions, getSummaryByUserId, createTransactions } from "../controller/transactionsController.js";
+import { getUserProfileInfo, getTransactionsByUserId, deleteTransactions, getSummaryByUserId, createTransactions } from "../controller/transactionsController.js";
 
 const router = express.Router();
 
 // To get the details from DB 
 router.get("/:userId", getTransactionsByUserId);
+
+// To get UserProfileInfo details from DB 
+router.get("/:userId", getUserProfileInfo);
 
 // To delete the details from DB 
 router.delete("/:id", deleteTransactions);
