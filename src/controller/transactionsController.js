@@ -31,7 +31,7 @@ export async function  createTransactions(req,res) {
         console.log(transactions);
         res.status(201).json(transactions[0]);
     } catch(error) {
-        console.log("Error In Creating Transactions : ", error);
+        console.log("Error In Creating Transaction : ", error);
         res.status(500).json({message:" Internal server error"});
     }
     
