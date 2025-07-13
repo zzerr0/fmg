@@ -46,7 +46,7 @@ export async function initDB() {
         )
         `;
 
-        console.log("=======DB Initialised sucessfully=====");
+        console.log(" DB Initialised sucessfully");
     } catch (error) {
         console.log("DB Initialised Failure", error);
         process.exit(1);
