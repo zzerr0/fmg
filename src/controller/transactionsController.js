@@ -24,7 +24,7 @@ export async function  createTransactions(req,res) {
           }
         
         const transactions = await sql `
-            INSERT INTO transactions(id, user_id, title, amount, category)
+            INSERT INTO transactions(user_id, title, amount, category)
             VALUES (${user_id},${title},${amount},${category})
             RETURNING *
         `
