@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/:userId", getTransactionsByUserId);
 
 // To get UserProfileInfo details from DB 
-router.get("/:userId", getUserProfileInfo);
+router.get("/getprofile/:userId", getUserProfileInfo);
 
 // To delete the details from DB 
 router.delete("/:id", deleteTransactions);
