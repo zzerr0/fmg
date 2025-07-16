@@ -150,4 +150,85 @@ export async function getUserProfileInfo(req, res) {
         .json({ message: "Internal server error" });
     }
 }
+
+// controllers/profileController.js
+export async function updateProfileData(req, res) {
+  try {
+    // 1) Pull userId from the URL, other fields from the body
+    const { userId } = req.params;
+    const {
+      name,
+      email,
+      phone,
+      sports,
+      sports_other,
+      experience,
+      experience_other,
+      preferences,
+      preferences_other,
+      health,
+      health_other,
+      bmi,
+      bmi_other,
+      ageGroup,
+      ageGroup_other,
+      bloodGroup,
+      bloodGroup_other,
+    } = req.body;
+
+    console.log('updateProfileData body:', { userId, ...req.body });
+
+    // 2) Basic validation: require at least these core fields
+    if (!userId || !name?.trim() || !email?.trim() || !ageGroup || !bloodGroup) {
+      return res
+        .status(400)
+        .json({
+          message:
+            'Missing required fields: userId, name, email, ageGroup, bloodGroup',
+        });
+    }
+
+    // 3) Perform the UPDATE
+    const [updated] = await sql`
+      UPDATE userprofileinfo
+      SET
+        name            = ${name},
+        email           = ${email},
+        phone           = ${phone},
+        sports          = ${sports},
+        sports_other    = ${sports_other},
+        experience      = ${experience},
+        experience_other= ${experience_other},
+        preferences     = ${preferences},
+        preferences_other= ${preferences_other},
+        health          = ${health},
+        health_other    = ${health_other},
+        bmi             = ${bmi},
+        bmi_other       = ${bmi_other},
+        agegroup        = ${ageGroup},
+        agegroup_other  = ${ageGroup_other},
+        bloodgroup      = ${bloodGroup},
+        bloodgroup_other= ${bloodGroup_other}
+      WHERE user_id = ${userId}
+      RETURNING *;
+    `;
+
+    if (!updated) {
+      // no row matched that user_id
+      return res
+        .status(404)
+        .json({ message: `No profile found for user_id=${userId}` });
+    }
+
+    console.log('Updated profile:', updated);
+    return res.status(200).json(updated);
+
+  } catch (error) {
+    console.error('Error in updateProfileData:', error);
+    return res
+      .status(500)
+      .json({ message: 'Internal server error updating profile' });
+  }
+}
+
   
