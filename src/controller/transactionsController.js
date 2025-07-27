@@ -232,6 +232,7 @@ export async function updateProfileData(req, res) {
 }
 
 
+
 //Fetching Treks
 export async function getFilteredTreks(req, res) {
   try {
@@ -241,53 +242,51 @@ export async function getFilteredTreks(req, res) {
       return res.status(400).json({ message: "Keyword is required" });
     }
 
-    // Build individual SQL conditions
+    // Build SQL conditions
     const conditions = [sql`LOWER(name) LIKE LOWER(${`%${keyword}%`})`];
 
     if (routeTypes) {
       const routeList = routeTypes.split(",").map(r => r.trim());
       if (routeList.length > 0) {
-        conditions.push(sql`route_type = ANY (${sql.array(routeList, 'text')})`);
+        conditions.push(sql`route_type = ANY (${routeList})`);
       }
     }
 
     if (attractions) {
       const attractionList = attractions.split(",").map(a => a.trim());
       if (attractionList.length > 0) {
-        conditions.push(sql`attractions && ${sql.array(attractionList, 'text')}`);
+        conditions.push(sql`attractions && ${attractionList}`);
       }
     }
 
-    // Manually combine conditions with AND
+    // Combine WHERE conditions
     let whereClause = conditions[0];
     for (let i = 1; i < conditions.length; i++) {
       whereClause = sql`${whereClause} AND ${conditions[i]}`;
     }
 
-    // Order clause
+    // Sorting logic
     let orderClause = sql`ORDER BY created_at DESC`;
     if (sort === "Most Popular") {
       orderClause = sql`ORDER BY popularity DESC`;
     } else if (sort === "Closest") {
-      orderClause = sql`ORDER BY location ASC`; // Replace with real distance logic
+      orderClause = sql`ORDER BY location ASC`; // Placeholder
     } else if (sort === "Seasonal") {
       orderClause = sql`ORDER BY season_priority DESC`;
     } else if (sort === "Newly Added") {
       orderClause = sql`ORDER BY created_at DESC`;
     }
 
-    // Final SQL query
-    const query = sql`
+    // Execute final query
+    const treks = await sql`
       SELECT * FROM treks
       WHERE ${whereClause}
       ${orderClause}
     `;
 
-    const treks = await query;
     res.status(200).json({ treks });
-
   } catch (error) {
-    console.error("Error fetching treks:", error.message, error.stack);
+    console.error("Error fetching treks:", error.message);
     res.status(500).json({ message: error.message });
   }
 }
