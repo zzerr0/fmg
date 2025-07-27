@@ -288,6 +288,6 @@ export async function getFilteredTreks(req, res) {
 
   } catch (error) {
     console.error("Error fetching treks:", error.message, error.stack);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: error.message });
   }
 }
