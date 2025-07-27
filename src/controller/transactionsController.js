@@ -241,7 +241,7 @@ export async function getFilteredTreks(req, res) {
       return res.status(400).json({ message: "Keyword is required" });
     }
 
-    // Step 1: Build WHERE conditions
+    // Build individual SQL conditions
     const conditions = [sql`LOWER(name) LIKE LOWER(${`%${keyword}%`})`];
 
     if (routeTypes) {
@@ -258,23 +258,28 @@ export async function getFilteredTreks(req, res) {
       }
     }
 
-    // Step 2: Determine ORDER BY clause
+    // Manually combine conditions with AND
+    let whereClause = conditions[0];
+    for (let i = 1; i < conditions.length; i++) {
+      whereClause = sql`${whereClause} AND ${conditions[i]}`;
+    }
+
+    // Order clause
     let orderClause = sql`ORDER BY created_at DESC`;
     if (sort === "Most Popular") {
       orderClause = sql`ORDER BY popularity DESC`;
     } else if (sort === "Closest") {
-      orderClause = sql`ORDER BY location ASC`; // update if using lat/lng
+      orderClause = sql`ORDER BY location ASC`; // Replace with real distance logic
     } else if (sort === "Seasonal") {
       orderClause = sql`ORDER BY season_priority DESC`;
     } else if (sort === "Newly Added") {
       orderClause = sql`ORDER BY created_at DESC`;
     }
 
-    // Step 3: Final query
+    // Final SQL query
     const query = sql`
-      SELECT *
-      FROM treks
-      WHERE ${sql.join(conditions, sql` AND `)}
+      SELECT * FROM treks
+      WHERE ${whereClause}
       ${orderClause}
     `;
 
@@ -282,7 +287,7 @@ export async function getFilteredTreks(req, res) {
     res.status(200).json({ treks });
 
   } catch (error) {
-    console.error("Error fetching treks:", error?.message, error?.stack);
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching treks:", error.message, error.stack);
+    res.status(500).json({ message: "Internal server error" });
   }
 }
