@@ -24,7 +24,7 @@ console.log("My Current Port : ", process.env.PORT );
 
 app.use("/api/transactions", transactionsRoutes);
 app.use("/api/getprofile", getprofileRoutes);
-app.use("/api/getprofile", gettrekRoutes);
+app.use("/api/gettreks", gettrekRoutes);
 
 
 initDB().then( () => {
