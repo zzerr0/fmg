@@ -241,48 +241,48 @@ export async function getFilteredTreks(req, res) {
       return res.status(400).json({ message: "Keyword is required" });
     }
 
+    // Step 1: Build WHERE conditions
     const conditions = [sql`LOWER(name) LIKE LOWER(${`%${keyword}%`})`];
 
-    // Handle routeTypes
     if (routeTypes) {
-      const routeList = routeTypes.split(",").map((r) => r.trim());
+      const routeList = routeTypes.split(",").map(r => r.trim());
       if (routeList.length > 0) {
         conditions.push(sql`route_type = ANY (${sql.array(routeList, 'text')})`);
       }
     }
 
-    // Handle attractions
     if (attractions) {
-      const attractionList = attractions.split(",").map((a) => a.trim());
+      const attractionList = attractions.split(",").map(a => a.trim());
       if (attractionList.length > 0) {
         conditions.push(sql`attractions && ${sql.array(attractionList, 'text')}`);
       }
     }
 
-    // Determine ORDER BY clause
-    let orderClause = sql`ORDER BY created_at DESC`; // default
+    // Step 2: Determine ORDER BY clause
+    let orderClause = sql`ORDER BY created_at DESC`;
     if (sort === "Most Popular") {
       orderClause = sql`ORDER BY popularity DESC`;
     } else if (sort === "Closest") {
-      orderClause = sql`ORDER BY location ASC`; // Replace if you have lat/lng
+      orderClause = sql`ORDER BY location ASC`; // update if using lat/lng
     } else if (sort === "Seasonal") {
       orderClause = sql`ORDER BY season_priority DESC`;
     } else if (sort === "Newly Added") {
       orderClause = sql`ORDER BY created_at DESC`;
     }
 
-    // Final query with dynamic WHERE clauses
-    const treks = await sql`
+    // Step 3: Final query
+    const query = sql`
       SELECT *
       FROM treks
       WHERE ${sql.join(conditions, sql` AND `)}
       ${orderClause}
     `;
 
+    const treks = await query;
     res.status(200).json({ treks });
 
   } catch (error) {
-    console.error("Error fetching treks:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error fetching treks:", error?.message, error?.stack);
+    res.status(500).json({ message: error.message });
   }
 }
