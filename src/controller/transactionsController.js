@@ -231,4 +231,49 @@ export async function updateProfileData(req, res) {
   }
 }
 
-  
+
+//Fetching Treks
+export async function getFilteredTreks(req, res) {
+  try {
+    const { keyword, routeTypes, attractions, sort } = req.query;
+
+    if (!keyword || keyword.trim() === "") {
+      return res.status(400).json({ message: "Keyword is required" });
+    }
+
+    let baseQuery = `
+      SELECT *
+      FROM treks
+      WHERE LOWER(title) LIKE LOWER('%' || ${keyword} || '%')
+    `;
+
+    if (routeTypes) {
+      const routeList = routeTypes.split(',').map(r => r.trim());
+      if (routeList.length) {
+        baseQuery += ` AND route_type = ANY (${sql.array(routeList, 'text')})`;
+      }
+    }
+
+    if (attractions) {
+      const attractionList = attractions.split(',').map(a => a.trim());
+      if (attractionList.length) {
+        baseQuery += ` AND attractions && ${sql.array(attractionList, 'text')}`; // assuming "attractions" is a text[]
+      }
+    }
+
+    // Optional sort logic
+    let orderByClause = "ORDER BY created_at DESC";
+    if (sort === "Most Popular") orderByClause = "ORDER BY popularity DESC";
+    else if (sort === "Closest") orderByClause = "ORDER BY distance ASC"; // assuming you have a distance column
+    else if (sort === "Seasonal") orderByClause = "ORDER BY season_priority DESC"; // hypothetical
+    else if (sort === "Newly Added") orderByClause = "ORDER BY created_at DESC";
+
+    const query = baseQuery + " " + orderByClause;
+
+    const treks = await sql.unsafe(query);
+    res.status(200).json({ treks });
+  } catch (error) {
+    console.error("Error fetching treks:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}

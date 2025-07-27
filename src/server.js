@@ -7,6 +7,7 @@ import rateLimiter from "./middleware/rateLimiter.js";
 import { initDB } from "./config/db.js";
 import transactionsRoutes from "./routes/transactionsRoutes.js";
 import getprofileRoutes from "./routes/getprofileRoutes.js";
+import gettrekRoutes from "./routes/gettrekRoutes.js";
 
 
 
@@ -23,6 +24,7 @@ console.log("My Current Port : ", process.env.PORT );
 
 app.use("/api/transactions", transactionsRoutes);
 app.use("/api/getprofile", getprofileRoutes);
+app.use("/api/getprofile", gettrekRoutes);
 
 
 initDB().then( () => {
