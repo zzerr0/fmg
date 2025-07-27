@@ -5,7 +5,7 @@ import { getFilteredTreks} from "../controller/transactionsController.js";
 const router = express.Router();
 
 
-router.get("/treks/filter", getFilteredTreks);
+router.get("/filter", getFilteredTreks);
 
 
 export default router;
