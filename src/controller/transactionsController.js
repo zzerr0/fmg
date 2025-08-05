@@ -243,8 +243,10 @@ export async function getFilteredTreks(req, res) {
     }
 
     // Build SQL conditions
-    const conditions = [sql`LOWER(name) LIKE LOWER(${`%${keyword}%`})`];
-
+    const keywordPattern = `%${keyword}%`;
+    const conditions = [
+      sql`( name ILIKE ${keywordPattern} OR location ILIKE ${keywordPattern})`
+    ];
     if (routeTypes) {
       const routeList = routeTypes.split(",").map(r => r.trim());
       if (routeList.length > 0) {
